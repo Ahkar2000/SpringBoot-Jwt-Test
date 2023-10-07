@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class JwtService {
             long expiration
     ) {
         User user = userRepo.findByEmail(userDetails.getUsername()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found!"));
-        extraClaims.put("role", user.getRole());
+        extraClaims.put("roles", Collections.singletonList(user.getRole()));
         return Jwts
                 .builder()
                 .setClaims(extraClaims)

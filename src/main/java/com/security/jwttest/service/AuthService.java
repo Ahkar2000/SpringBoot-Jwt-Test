@@ -33,7 +33,7 @@ public class AuthService {
     private final TokenRepo tokenRepo;
 
     public AuthResponse register(RegisterRequest request) {
-        var user = User.builder()
+        User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -50,7 +50,7 @@ public class AuthService {
                         request.getPassword()
                 )
         );
-        var user = userRepo.findByEmail(request.getEmail())
+        User user = userRepo.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         return getAuthResponse(user);
     }
@@ -74,17 +74,17 @@ public class AuthService {
 
         userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
-            var user = this.userRepo.findByEmail(userEmail)
+            User user = this.userRepo.findByEmail(userEmail)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
             if (jwtService.isTokenValid(refreshToken, user)) {
-                var accessToken = jwtService.generateToken(user);
-                var newRefreshToken = jwtService.generateRefreshToken(user);
+                String accessToken = jwtService.generateToken(user);
+                String newRefreshToken = jwtService.generateRefreshToken(user);
 
                 revokeAllUserTokens(user);
                 saveUserToken(user, accessToken, TokenType.NORMAL_TOKEN);
                 saveUserToken(user, newRefreshToken, TokenType.REFRESH_TOKEN);
 
-                var authResponse = AuthResponse.builder()
+                AuthResponse authResponse = AuthResponse.builder()
                         .accessToken(accessToken)
                         .refreshToken(newRefreshToken)
                         .build();
@@ -99,8 +99,8 @@ public class AuthService {
     }
 
     private AuthResponse getAuthResponse(User user) {
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
+        String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken, TokenType.NORMAL_TOKEN);
         saveUserToken(user, refreshToken, TokenType.REFRESH_TOKEN);
@@ -111,7 +111,7 @@ public class AuthService {
     }
 
     private void saveUserToken(User user, String jwtToken, TokenType tokenType) {
-        var token = Token.builder()
+        Token token = Token.builder()
                 .userId(user.getId())
                 .token(jwtToken)
                 .tokenType(tokenType)
